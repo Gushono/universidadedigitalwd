@@ -836,6 +836,7 @@ function App() {
                                     </div>
                                 </div>
                                 
+                                {/* QR Code dos usuários */}
                                 <div className="qr-code">
                                     {currentUser.email === "hugo.bersi@aluno.wyden.edu.br" ? (
                                         <img src="/photos/hugo-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
