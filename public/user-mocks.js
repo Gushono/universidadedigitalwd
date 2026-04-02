@@ -214,24 +214,24 @@ const USER_MOCKS = {
         ]
     },
 
-    // Mauricio Gonçalves Pires Junior (cópia de Gustavo Honorato Nicolau)
+    // Mauricio Gonçalves Pires Junior
     'mauricio.pires@aluno.wyden.edu.br': {
         id: 'student_mauricio',
         name: 'Mauricio Gonçalves Pires Junior',
         email: 'mauricio.pires@aluno.wyden.edu.br',
-        matricula: '202401085433', // Próxima sequência
+        matricula: '202401085433',
         curso: 'Sistemas de Informação',
         periodo: '3º Semestre',
         campus: 'São Paulo - Vila Mariana',
         situacao: 'Ativo',
         cr: '9.1',
         cargaHoraria: '960 / 3.200 horas',
-        cpf: '416.555.788-91', // Pode ser igual ao Gustavo, pois é mock
+        cpf: '416.555.788-91',
         rg: '52.792.785-2',
         dataNascimento: '04/12/1998',
         telefone: '(13) 98154-4777',
         tipoSanguineo: 'O+',
-        numeroCarteirinha: 'WYD2401765450003', // Próxima sequência
+        numeroCarteirinha: 'WYD2401765450003',
         formaIngresso: 'Vestibular Wyden 2024.1',
         turno: 'Noturno',
         type: 'student',
@@ -414,9 +414,10 @@ const USER_MOCKS = {
         ]
     },
 
+    // Eduardo Henrique
     'eduardo.henrique@aluno.wyden.edu.br': {
         id: 'student_eduardo',
-        name: 'Eduardo Henrique',     
+        name: 'Eduardo Henrique',
         email: 'eduardo.henrique@aluno.wyden.edu.br',
         matricula: '202401056712',
         curso: 'Direito',
@@ -434,7 +435,7 @@ const USER_MOCKS = {
         formaIngresso: 'Vestibular Wyden 2024.1',
         turno: 'Matutino',
         type: 'student',
-        hasPhoto: true, // Sem foto ainda
+        hasPhoto: true,
         photoPath: 'photos/eduardo-henrique.jpg',
         disciplinas: [
             {
@@ -537,6 +538,134 @@ const USER_MOCKS = {
         ]
     },
 
+    // ── NOVAS USUÁRIAS ──────────────────────────────────────────────────────────
+
+    // Carla Letícia Oliveira de Souza
+    'carla.souza@aluno.wyden.edu.br': {
+        id: 'student_carla',
+        name: 'Carla Letícia Oliveira de Souza',
+        email: 'carla.souza@aluno.wyden.edu.br',
+        matricula: '202401092301',
+        curso: 'Administração',
+        periodo: '4º Semestre',
+        campus: 'São Paulo - Vila Mariana',
+        situacao: 'Ativo',
+        cr: '8.6',
+        cargaHoraria: '1280 / 3.200 horas',
+        cpf: '427.364.378-29',
+        rg: '49.163.769-X',
+        dataNascimento: '14/05/2001',
+        telefone: '(11) 97654-3210',
+        tipoSanguineo: 'A+',
+        numeroCarteirinha: 'WYD2401923010001',
+        formaIngresso: 'ENEM 2024.1',
+        turno: 'Noturno',
+        type: 'student',
+        hasPhoto: true,
+        photoPath: 'photos/leticia-souza.jpg',
+        disciplinas: [
+            {
+                codigo: 'ADM401',
+                nome: 'Gestão de Pessoas',
+                creditos: 4,
+                nota: 9.0,
+                situacao: 'Aprovado'
+            },
+            {
+                codigo: 'ADM402',
+                nome: 'Finanças Corporativas',
+                creditos: 4,
+                nota: 8.2,
+                situacao: 'Aprovado'
+            },
+            {
+                codigo: 'ADM403',
+                nome: 'Marketing Estratégico',
+                creditos: 3,
+                nota: null,
+                situacao: 'Em Andamento'
+            },
+            {
+                codigo: 'ADM404',
+                nome: 'Empreendedorismo',
+                creditos: 3,
+                nota: null,
+                situacao: 'Em Andamento'
+            },
+            {
+                codigo: 'ADM405',
+                nome: 'Direito Empresarial',
+                creditos: 2,
+                nota: null,
+                situacao: 'Em Andamento'
+            }
+        ]
+    },
+
+    // Tauane dos Santos Souza
+    'tauane.souza@aluno.wyden.edu.br': {
+        id: 'student_tauane',
+        name: 'Tauane dos Santos Souza',
+        email: 'tauane.souza@aluno.wyden.edu.br',
+        matricula: '202401092302',
+        curso: 'Administração',
+        periodo: '4º Semestre',
+        campus: 'São Paulo - Vila Mariana',
+        situacao: 'Ativo',
+        cr: '8.9',
+        cargaHoraria: '1280 / 3.200 horas',
+        cpf: '426.429.028-70',
+        rg: '36.527.500-1',
+        dataNascimento: '22/08/2000',
+        telefone: '(11) 91234-5678',
+        tipoSanguineo: 'O+',
+        numeroCarteirinha: 'WYD2401923020001',
+        formaIngresso: 'ENEM 2024.1',
+        turno: 'Noturno',
+        type: 'student',
+        hasPhoto: true,
+        photoPath: 'photos/tauane.jpg',
+        disciplinas: [
+            {
+                codigo: 'ADM401',
+                nome: 'Gestão de Pessoas',
+                creditos: 4,
+                nota: 9.2,
+                situacao: 'Aprovado'
+            },
+            {
+                codigo: 'ADM402',
+                nome: 'Finanças Corporativas',
+                creditos: 4,
+                nota: 8.7,
+                situacao: 'Aprovado'
+            },
+            {
+                codigo: 'ADM403',
+                nome: 'Marketing Estratégico',
+                creditos: 3,
+                nota: null,
+                situacao: 'Em Andamento'
+            },
+            {
+                codigo: 'ADM404',
+                nome: 'Empreendedorismo',
+                creditos: 3,
+                nota: null,
+                situacao: 'Em Andamento'
+            },
+            {
+                codigo: 'ADM405',
+                nome: 'Direito Empresarial',
+                creditos: 2,
+                nota: null,
+                situacao: 'Em Andamento'
+            }
+        ]
+    },
+
+    // ── FIM DAS NOVAS USUÁRIAS ──────────────────────────────────────────────────
+
     // Professor exemplo
     'maria.santos@wyden.edu.br': {
         id: 'teacher_maria',
@@ -558,7 +687,7 @@ const USER_MOCKS = {
         departamento: 'Administração Acadêmica',
         telefone: '(11) 5555-6666',
         type: 'admin',
-        hasPhoto: false // Sem foto
+        hasPhoto: false
     }
 };
 
@@ -582,4 +711,4 @@ if (typeof window !== 'undefined') {
     window.USER_MOCKS = USER_MOCKS;
     window.getUserByEmail = getUserByEmail;
     window.authenticateUser = authenticateUser;
-} 
+}
