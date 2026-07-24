@@ -447,8 +447,8 @@ function App() {
                 </div>
             </nav>
 
-            {/* Remover a seção de videoaulas da home */}
-            {currentPage === 'home' && (!isLoggedIn || !currentUser) && (
+            {/* Página inicial pública */}
+            {currentPage === 'home' && (
                 <div>
                     <section className="hero-section text-white text-center py-5" 
                              style={{background: 'linear-gradient(135deg, rgba(229, 62, 62, 0.9), rgba(197, 48, 48, 0.9))'}}>
