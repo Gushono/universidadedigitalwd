@@ -679,7 +679,7 @@ const USER_MOCKS = {
         cpf: '178.871.978-64',
         rg: '47.812.904-9',
         dataNascimento: '11/02/2001',
-        telefone: '(11) 93456-7890',
+        telefone: '(19) 99167-5336',
         tipoSanguineo: 'B+',
         numeroCarteirinha: 'WYD2401923030001',
         formaIngresso: 'ENEM 2024.1',
