@@ -664,6 +664,68 @@ const USER_MOCKS = {
         ]
     },
 
+    // Alessandra dos Santos Souza
+    'alessandra.souza@aluno.wyden.edu.br': {
+        id: 'student_alessandra',
+        name: 'Alessandra dos Santos Souza',
+        email: 'alessandra.souza@aluno.wyden.edu.br',
+        matricula: '202401092303',
+        curso: 'Administração',
+        periodo: '4º Semestre',
+        campus: 'São Paulo - Vila Mariana',
+        situacao: 'Ativo',
+        cr: '8.8',
+        cargaHoraria: '1280 / 3.200 horas',
+        cpf: '178.871.978-64',
+        rg: '47.812.904-9',
+        dataNascimento: '11/02/2001',
+        telefone: '(11) 93456-7890',
+        tipoSanguineo: 'B+',
+        numeroCarteirinha: 'WYD2401923030001',
+        formaIngresso: 'ENEM 2024.1',
+        turno: 'Noturno',
+        type: 'student',
+        hasPhoto: true,
+        photoPath: 'photos/alessandra-souza.jpg',
+        disciplinas: [
+            {
+                codigo: 'ADM401',
+                nome: 'Gestão de Pessoas',
+                creditos: 4,
+                nota: 8.8,
+                situacao: 'Aprovado'
+            },
+            {
+                codigo: 'ADM402',
+                nome: 'Finanças Corporativas',
+                creditos: 4,
+                nota: 8.5,
+                situacao: 'Aprovado'
+            },
+            {
+                codigo: 'ADM403',
+                nome: 'Marketing Estratégico',
+                creditos: 3,
+                nota: null,
+                situacao: 'Em Andamento'
+            },
+            {
+                codigo: 'ADM404',
+                nome: 'Empreendedorismo',
+                creditos: 3,
+                nota: null,
+                situacao: 'Em Andamento'
+            },
+            {
+                codigo: 'ADM405',
+                nome: 'Direito Empresarial',
+                creditos: 2,
+                nota: null,
+                situacao: 'Em Andamento'
+            }
+        ]
+    },
+
     // ── FIM DAS NOVAS USUÁRIAS ──────────────────────────────────────────────────
 
     // Professor exemplo

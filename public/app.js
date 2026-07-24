@@ -854,6 +854,8 @@ function App() {
                                         <img src="/photos/leticia-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                     ) : currentUser.email === "tauane.souza@aluno.wyden.edu.br" ? (
                                         <img src="/photos/tauane-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    ) : currentUser.email === "alessandra.souza@aluno.wyden.edu.br" ? (
+                                        <img src="/photos/alessandra-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                     ) : (
                                         <a href={`/${currentUser.email}`} target="_blank" style={{ color: "var(--primary-color)", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }} title="Clique para acessar informações públicas">
                                             QR<br />CODE
