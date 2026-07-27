@@ -222,7 +222,35 @@ function App() {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedCourse, setSelectedCourse] = useState(null);
+    const [cardData, setCardData] = useState(null);
+    const [cardLoading, setCardLoading] = useState(false);
     const academicEvents = React.useMemo(() => generateUpcomingEvents(), []);
+
+    // Carregar dados da carteirinha da API
+    const fetchCardData = async (email) => {
+        if (!email) return;
+        setCardLoading(true);
+        try {
+            const response = await fetch(`https://railwayuniversity-production.up.railway.app/users/${email}`);
+            if (response.ok) {
+                const data = await response.json();
+                setCardData(data.user || data);
+            } else {
+                console.warn('Erro ao carregar dados da carteirinha, usando dados locais');
+            }
+        } catch (error) {
+            console.error('Erro ao conectar à API:', error);
+        } finally {
+            setCardLoading(false);
+        }
+    };
+
+    // Buscar dados quando usuario faz login
+    React.useEffect(() => {
+        if (currentUser?.email && currentPage === 'card') {
+            fetchCardData(currentUser.email);
+        }
+    }, [currentUser?.email, currentPage]);
 
     // Detectar se é uma página de usuário pela URL
     React.useEffect(() => {
@@ -814,86 +842,87 @@ function App() {
                             <i className="fas fa-id-card"></i> Carteirinha Virtual
                         </h2>
                         
-                        <div className="cards-display">
-                            <div className="student-card">
-                                <div className="card-header">
-                                    <div className="university-logo">
-                                        <WydenLogo size="35px" />
-                                        <div>
-                                            <div className="university-name">FACULDADE WYDEN</div>
-                                            <div className="card-title">CARTEIRA DE IDENTIFICAÇÃO ESTUDANTIL</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div className="card-body">
-                                    <div className="student-photo">
-                                        {currentUser?.hasPhoto && currentUser?.photoPath ? (
-                                            <img src={currentUser.photoPath} alt={currentUser.name} 
-                                                 onError={(e) => {
-                                                     e.target.style.display = 'none';
-                                                     e.target.nextSibling.style.display = 'flex';
-                                                 }} />
-                                        ) : null}
-                                        <i className={`fas fa-user ${currentUser?.hasPhoto && currentUser?.photoPath ? 'd-none' : ''}`}></i>
-                                    </div>
-                                    <div className="student-info">
-                                        <h6>{currentUser.name}</h6>
-                                        <div className="student-details">
-                                            <div><strong>Matrícula:</strong> {currentUser.matricula}</div>
-                                            <div><strong>Curso:</strong> {currentUser.curso}</div>
-                                            <div><strong>Período:</strong> {currentUser.periodo}</div>
-                                            <div><strong>Campus:</strong> {currentUser.campus}</div>
-                                        </div>
-                                    </div>
+                        {cardLoading && (
+                            <div className="text-center">
+                                <div className="spinner-border" role="status">
+                                    <span className="visually-hidden">Carregando...</span>
                                 </div>
                             </div>
-                            
-                            <div className="student-card-back">
-                                <div className="card-header">
-                                    <div className="card-number">
-                                        <strong>Nº:</strong> {currentUser.numeroCarteirinha}
-                                    </div>
-                                </div>
-                                
-                                {/* QR Code dos usuários */}
-                                <div className="qr-code">
-                                    {currentUser.email === "hugo.bersi@aluno.wyden.edu.br" ? (
-                                        <img src="/photos/hugo-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    ) : currentUser.email === "gustavo.honorato@aluno.wyden.edu.br" ? (
-                                        <img src="/photos/gustavo-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    ) : currentUser.email === "mauricio.pires@aluno.wyden.edu.br" ? (
-                                        <img src="/photos/mauricio-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    ) : currentUser.email === "fabio.henrique@aluno.wyden.edu.br" ? (
-                                        <img src="/photos/fabio-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    ) : currentUser.email === "guilherme.batista@aluno.wyden.edu.br" ? (
-                                        <img src="/photos/guilherme-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    ) : currentUser.email === "eduardo.henrique@aluno.wyden.edu.br" ? (
-                                        <img src="/photos/eduardo-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    ) : currentUser.email === "carla.souza@aluno.wyden.edu.br" ? (
-                                        <img src="/photos/leticia-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    ) : currentUser.email === "tauane.souza@aluno.wyden.edu.br" ? (
-                                        <img src="/photos/tauane-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    ) : currentUser.email === "alessandra.souza@aluno.wyden.edu.br" ? (
-                                        <img src="/photos/alessandra-qrcode.png" alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    ) : (
-                                        <a href={`/${currentUser.email}`} target="_blank" style={{ color: "var(--primary-color)", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }} title="Clique para acessar informações públicas">
-                                            QR<br />CODE
-                                        </a>
-                                    )}
-                                    <div style={{ display: "none", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", color: "var(--primary-color)", fontSize: "0.65rem", fontWeight: "bold", textAlign: "center" }}> QR<br />CODE </div>
-                                </div>
-                                
-                                <div className="emergency-info">
-                                    <p><strong>Emergência:</strong> {currentUser.telefone}</p>
-                                    <p><strong>Válida até:</strong> 12/2028</p>
-                                </div>
+                        )}
+                        
+                        {!cardLoading && (
+                            <>
+                                {(() => {
+                                    const displayUser = cardData || currentUser;
+                                    return (
+                                        <div className="cards-display">
+                                            <div className="student-card">
+                                                <div className="card-header">
+                                                    <div className="university-logo">
+                                                        <WydenLogo size="35px" />
+                                                        <div>
+                                                            <div className="university-name">FACULDADE WYDEN</div>
+                                                            <div className="card-title">CARTEIRA DE IDENTIFICAÇÃO ESTUDANTIL</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="card-body">
+                                                    <div className="student-photo">
+                                                        {displayUser?.fotoPath ? (
+                                                            <img src={displayUser.fotoPath} alt={displayUser.name} 
+                                                                 onError={(e) => {
+                                                                     e.target.style.display = 'none';
+                                                                     e.target.nextSibling.style.display = 'flex';
+                                                                 }} />
+                                                        ) : null}
+                                                        <i className={`fas fa-user ${displayUser?.fotoPath ? 'd-none' : ''}`}></i>
+                                                    </div>
+                                                    <div className="student-info">
+                                                        <h6>{displayUser.name}</h6>
+                                                        <div className="student-details">
+                                                            <div><strong>Matrícula:</strong> {displayUser.matricula}</div>
+                                                            <div><strong>Curso:</strong> {displayUser.curso}</div>
+                                                            <div><strong>Período:</strong> {displayUser.periodo}</div>
+                                                            <div><strong>Campus:</strong> {displayUser.campus}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="student-card-back">
+                                                <div className="card-header">
+                                                    <div className="card-number">
+                                                        <strong>Nº:</strong> {displayUser.numero}
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* QR Code dos usuários */}
+                                                <div className="qr-code">
+                                                    {displayUser?.qrCodePath ? (
+                                                        <img src={displayUser.qrCodePath} alt="QR Code" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                                    ) : (
+                                                        <a href={`/${displayUser.email}`} target="_blank" style={{ color: "var(--primary-color)", textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }} title="Clique para acessar informações públicas">
+                                                            QR<br />CODE
+                                                        </a>
+                                                    )}
+                                                    <div style={{ display: "none", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", color: "var(--primary-color)", fontSize: "0.65rem", fontWeight: "bold", textAlign: "center" }}> QR<br />CODE </div>
+                                                </div>
+                                                
+                                                <div className="emergency-info">
+                                                    <p><strong>Emergência:</strong> {displayUser.emergencia}</p>
+                                                    <p><strong>Válida até:</strong> {displayUser.validade}</p>
+                                                </div>
 
-                                <div className="observations">
-                                    <p><strong>OBSERVAÇÕES:</strong> Esta carteira é válida apenas com documento oficial de identidade. Em caso de perda, comunicar imediatamente à secretaria acadêmica.</p>
-                                </div>
-                            </div>
-                        </div>
+                                                <div className="observations">
+                                                    <p><strong>OBSERVAÇÕES:</strong> Esta carteira é válida apenas com documento oficial de identidade. Em caso de perda, comunicar imediatamente à secretaria acadêmica.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </>
+                        )}
                         
                         <div className="text-center mt-5">
                             <p className="text-muted mb-4">
