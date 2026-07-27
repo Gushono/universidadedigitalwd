@@ -742,6 +742,10 @@ function App() {
                                                 <div className="col-sm-7">{currentUser.dataNascimento}</div>
                                             </div>
                                             <div className="row mb-3">
+                                                <div className="col-sm-5"><strong>CPF:</strong></div>
+                                                <div className="col-sm-7">{currentUser.cpf || '-'}</div>
+                                            </div>
+                                            <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>Email Institucional:</strong></div>
                                                 <div className="col-sm-7">{currentUser.email}</div>
                                             </div>
