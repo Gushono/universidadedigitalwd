@@ -222,33 +222,48 @@ function App() {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedCourse, setSelectedCourse] = useState(null);
-    const [cardData, setCardData] = useState(null);
-    const [cardLoading, setCardLoading] = useState(false);
+    const [apiUserData, setApiUserData] = useState(null);
+    const [userDataLoading, setUserDataLoading] = useState(false);
     const academicEvents = React.useMemo(() => generateUpcomingEvents(), []);
 
-    // Carregar dados da carteirinha da API
-    const fetchCardData = async (email) => {
+    // Usuário exibido: dados da API (cpf, etc.) têm prioridade sobre os mocks locais
+    const displayUser = React.useMemo(() => {
+        if (!currentUser) return null;
+        if (!apiUserData) return currentUser;
+
+        // Ignora campos vazios da API para não apagar dados que só existem no mock
+        const apiFields = Object.entries(apiUserData)
+            .filter(([, value]) => value !== null && value !== undefined && value !== '')
+            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+        return { ...currentUser, ...apiFields };
+    }, [currentUser, apiUserData]);
+
+    // Carregar dados do usuário da API
+    const fetchUserData = async (email) => {
         if (!email) return;
-        setCardLoading(true);
+        setUserDataLoading(true);
         try {
             const response = await fetch(`https://railwayuniversity-production.up.railway.app/users/${email}`);
             if (response.ok) {
                 const data = await response.json();
-                setCardData(data.user || data);
+                setApiUserData(data.user || data);
             } else {
-                console.warn('Erro ao carregar dados da carteirinha, usando dados locais');
+                console.warn('Erro ao carregar dados da API, usando dados locais');
+                setApiUserData(null);
             }
         } catch (error) {
             console.error('Erro ao conectar à API:', error);
+            setApiUserData(null);
         } finally {
-            setCardLoading(false);
+            setUserDataLoading(false);
         }
     };
 
-    // Buscar dados quando usuario faz login
+    // Buscar dados quando usuario faz login ou muda de página
     React.useEffect(() => {
-        if (currentUser?.email && currentPage === 'card') {
-            fetchCardData(currentUser.email);
+        if (currentUser?.email && (currentPage === 'card' || currentPage === 'profile')) {
+            fetchUserData(currentUser.email);
         }
     }, [currentUser?.email, currentPage]);
 
@@ -299,6 +314,7 @@ function App() {
     const logout = () => {
         setIsLoggedIn(false);
         setCurrentUser(null);
+        setApiUserData(null);
         setCurrentPage('home');
         setShowUserDropdown(false);
     };
@@ -743,7 +759,11 @@ function App() {
                                             </div>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>CPF:</strong></div>
-                                                <div className="col-sm-7">{currentUser.cpf || '-'}</div>
+                                                <div className="col-sm-7">
+                                                    {userDataLoading && !displayUser.cpf
+                                                        ? <span className="text-muted">Carregando...</span>
+                                                        : (displayUser.cpf || '-')}
+                                                </div>
                                             </div>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>Email Institucional:</strong></div>
@@ -846,18 +866,17 @@ function App() {
                             <i className="fas fa-id-card"></i> Carteirinha Virtual
                         </h2>
                         
-                        {cardLoading && (
+                        {userDataLoading && (
                             <div className="text-center">
                                 <div className="spinner-border" role="status">
                                     <span className="visually-hidden">Carregando...</span>
                                 </div>
                             </div>
                         )}
-                        
-                        {!cardLoading && (
+
+                        {!userDataLoading && (
                             <>
                                 {(() => {
-                                    const displayUser = cardData || currentUser;
                                     return (
                                         <div className="cards-display">
                                             <div className="student-card">
