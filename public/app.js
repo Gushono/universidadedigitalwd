@@ -134,6 +134,84 @@ const courseDetails = {
     }
 };
 
+const generateUpcomingEvents = (baseDate = new Date()) => {
+    const startDate = new Date(baseDate);
+    startDate.setHours(0, 0, 0, 0);
+
+    const eventTemplates = [
+        {
+            title: 'Palestra de IA e Automação',
+            type: 'workshop',
+            discipline: 'Inovação e Tecnologia',
+            professor: 'Prof. Ana Beatriz',
+            description: 'Discussão sobre ferramentas de IA aplicadas ao dia a dia acadêmico.',
+            location: 'Auditório Principal'
+        },
+        {
+            title: 'Mentoria de Carreira',
+            type: 'meeting',
+            discipline: 'Desenvolvimento Profissional',
+            professor: 'Prof. Daniel Moura',
+            description: 'Orientação para construção de portfólio e networking.',
+            location: 'Sala 401'
+        },
+        {
+            title: 'Workshop de Design Thinking',
+            type: 'workshop',
+            discipline: 'Empreendedorismo',
+            professor: 'Prof. Laura Nunes',
+            description: 'Atividade prática com foco em soluções criativas para problemas reais.',
+            location: 'Lab de Criatividade'
+        },
+        {
+            title: 'Prova de Fundamentos',
+            type: 'exam',
+            discipline: 'Fundamentos da Computação',
+            professor: 'Prof. Rodrigo Teixeira',
+            description: 'Avaliação teórica com aplicação prática.',
+            location: 'Sala 210'
+        },
+        {
+            title: 'Entrega de Projeto',
+            type: 'assignment',
+            discipline: 'Gestão de Projetos',
+            professor: 'Prof. Mariana Costa',
+            description: 'Prazo final para entrega do projeto interdisciplinar.',
+            location: 'Portal Acadêmico'
+        },
+        {
+            title: 'Live de Carreiras',
+            type: 'meeting',
+            discipline: 'Mercado de Trabalho',
+            professor: 'Prof. Bruno Almeida',
+            description: 'Sessão online com empresas parceiras e oportunidades de estágio.',
+            location: 'Online'
+        }
+    ];
+
+    const timeSlots = ['09:00', '14:00', '19:00'];
+    const offsets = [1, 2, 3, 5, 8, 10, 12, 14];
+
+    return offsets.slice(0, 6).map((offset, index) => {
+        const eventDate = new Date(startDate);
+        eventDate.setDate(startDate.getDate() + offset);
+        const template = eventTemplates[index % eventTemplates.length];
+
+        return {
+            id: index + 1,
+            title: template.title,
+            type: template.type,
+            date: eventDate.toISOString().split('T')[0],
+            time: timeSlots[index % timeSlots.length],
+            duration: template.type === 'exam' ? 120 : template.type === 'assignment' ? 0 : 180,
+            location: template.location,
+            discipline: template.discipline,
+            professor: template.professor,
+            description: template.description
+        };
+    }).sort((a, b) => new Date(a.date) - new Date(b.date));
+};
+
 function App() {
     const [currentPage, setCurrentPage] = useState('home');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -142,8 +220,9 @@ function App() {
     const [userPageEmail, setUserPageEmail] = useState(null);
     const [selectedVideo, setSelectedVideo] = useState(null);
     const [selectedEvent, setSelectedEvent] = useState(null);
-    const [currentMonth, setCurrentMonth] = useState(new Date(2025, 0, 1)); // Janeiro 2025
+    const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedCourse, setSelectedCourse] = useState(null);
+    const academicEvents = React.useMemo(() => generateUpcomingEvents(), []);
 
     // Detectar se é uma página de usuário pela URL
     React.useEffect(() => {
@@ -164,6 +243,11 @@ function App() {
         }
         setCurrentPage(page);
         setShowUserDropdown(false); // Fechar dropdown ao navegar
+
+        if (page === 'calendar') {
+            setCurrentMonth(new Date());
+            setSelectedEvent(null);
+        }
     };
 
     const handleLogin = (email, password) => {
@@ -252,70 +336,6 @@ function App() {
             category: "Cloud",
             instructor: "Prof. Ana Costa",
             date: "2025-03-12"
-        }
-    ];
-
-    // Adicionar dados mockados de eventos acadêmicos
-    const academicEvents = [
-        {
-            id: 1,
-            title: "Prova de Programação Web",
-            type: "exam",
-            date: "2025-03-25",
-            time: "19:00",
-            duration: "120",
-            location: "Sala 302",
-            discipline: "Programação Web",
-            professor: "Prof. Maria Santos",
-            description: "Prova prática de HTML, CSS e JavaScript"
-        },
-        {
-            id: 2,
-            title: "Entrega do TCC",
-            type: "assignment",
-            date: "2025-04-15",
-            time: "23:59",
-            duration: "0",
-            location: "Portal Acadêmico",
-            discipline: "Trabalho de Conclusão de Curso",
-            professor: "Prof. Carlos Silva",
-            description: "Entrega final do TCC com apresentação"
-        },
-        {
-            id: 3,
-            title: "Workshop de React",
-            type: "workshop",
-            date: "2025-03-28",
-            time: "14:00",
-            duration: "180",
-            location: "Laboratório 5",
-            discipline: "Desenvolvimento Web",
-            professor: "Prof. João Oliveira",
-            description: "Workshop prático de React.js e Hooks"
-        },
-        {
-            id: 4,
-            title: "Reunião de Estágio",
-            type: "meeting",
-            date: "2025-04-02",
-            time: "15:00",
-            duration: "60",
-            location: "Sala de Reuniões",
-            discipline: "Estágio Supervisionado",
-            professor: "Prof. Ana Costa",
-            description: "Apresentação do relatório de estágio"
-        },
-        {
-            id: 5,
-            title: "Prova de Banco de Dados",
-            type: "exam",
-            date: "2025-04-05",
-            time: "19:00",
-            duration: "120",
-            location: "Sala 205",
-            discipline: "Banco de Dados",
-            professor: "Prof. Carlos Silva",
-            description: "Prova teórica e prática de SQL"
         }
     ];
 
@@ -894,7 +914,7 @@ function App() {
                         <div className="container">
                             <div className="text-center">
                                 <h1 className="display-4 mb-4">Notícias</h1>
-                                <p className="lead mb-0">Fique por dentro das últimas novidades da Wyden</p>
+                                <p className="lead mb-0">Acompanhe os principais destaques, eventos e oportunidades da Wyden</p>
                             </div>
                         </div>
                     </section>
@@ -906,16 +926,16 @@ function App() {
                                     <div className="news-item">
                                         <div className="d-flex justify-content-between align-items-start mb-3">
                                             <span className="badge bg-primary">Destaque</span>
-                                            <small className="text-muted">15 de Novembro, 2025</small>
+                                            <small className="text-muted">18 de Julho, 2026</small>
                                         </div>
-                                        <h3>Wyden inaugura novo laboratório de Inteligência Artificial</h3>
-                                        <p>A Faculdade Wyden acaba de inaugurar seu mais novo laboratório, equipado com as tecnologias mais avançadas em IA e Machine Learning. O espaço conta com 40 estações de trabalho, GPUs de última geração e parcerias com empresas do Vale do Silício.</p>
+                                        <h3>Wyden amplia atuação em IA, dados e inovação</h3>
+                                        <p>A instituição lançou um novo núcleo de inovação com foco em inteligência artificial, análise de dados e automação, oferecendo laboratórios modernos e mentoria para projetos acadêmicos e corporativos.</p>
                                         <div className="d-flex align-items-center">
                                             <img src="https://via.placeholder.com/40" alt="Autor" className="rounded-circle me-2" />
                                             <div>
-                                                <small className="fw-bold">Prof. Maria Santos</small>
+                                                <small className="fw-bold">Prof. Camila Rocha</small>
                                                 <br />
-                                                <small className="text-muted">Coordenadora de Tecnologia</small>
+                                                <small className="text-muted">Coordenadora de Inovação</small>
                                             </div>
                                         </div>
                                     </div>
@@ -923,21 +943,21 @@ function App() {
                                     <div className="news-item">
                                         <div className="d-flex justify-content-between align-items-start mb-3">
                                             <span className="badge bg-success">Acadêmico</span>
-                                            <small className="text-muted">10 de Novembro, 2024</small>
+                                            <small className="text-muted">12 de Julho, 2026</small>
                                         </div>
-                                        <h4>Estudantes da Wyden conquistam primeiro lugar em hackathon nacional</h4>
-                                        <p>Equipe formada por alunos dos cursos de Sistemas de Informação e Marketing desenvolveu aplicativo inovador para gestão sustentável de resíduos urbanos, conquistando R$ 50.000 em premiação.</p>
+                                        <h4>Alunos da Wyden conquistam destaque em feira regional de tecnologia</h4>
+                                        <p>Uma equipe formada por estudantes de Sistemas de Informação e Administração apresentou um projeto voltado à eficiência energética e recebeu reconhecimento do júri por sua solução prática e inovadora.</p>
                                         <div className="row mt-3">
                                             <div className="col-md-6">
                                                 <ul className="list-unstyled">
-                                                    <li><i className="fas fa-trophy text-warning me-2"></i>1º Lugar Nacional</li>
-                                                    <li><i className="fas fa-users text-primary me-2"></i>5 estudantes participantes</li>
+                                                    <li><i className="fas fa-trophy text-warning me-2"></i>Reconhecimento regional</li>
+                                                    <li><i className="fas fa-users text-primary me-2"></i>10 estudantes participantes</li>
                                                 </ul>
                                             </div>
                                             <div className="col-md-6">
                                                 <ul className="list-unstyled">
-                                                    <li><i className="fas fa-dollar-sign text-success me-2"></i>R$ 50.000 em prêmios</li>
-                                                    <li><i className="fas fa-building text-info me-2"></i>Mentoria com startups</li>
+                                                    <li><i className="fas fa-lightbulb text-success me-2"></i>Projeto com aplicação real</li>
+                                                    <li><i className="fas fa-building text-info me-2"></i>Mentoria com empresas parceiras</li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -946,32 +966,32 @@ function App() {
                                     <div className="news-item">
                                         <div className="d-flex justify-content-between align-items-start mb-3">
                                             <span className="badge bg-info">Parcerias</span>
-                                            <small className="text-muted">5 de Novembro, 2024</small>
+                                            <small className="text-muted">8 de Julho, 2026</small>
                                         </div>
-                                        <h4>Nova parceria com Microsoft oferece certificações gratuitas</h4>
-                                        <p>Estudantes da Wyden agora têm acesso gratuito às certificações Microsoft Azure, Power Platform e Microsoft 365, aumentando suas chances no mercado de trabalho.</p>
+                                        <h4>Nova parceria com Microsoft e Google Cloud amplia acesso a certificações</h4>
+                                        <p>Estudantes e professores ganharam acesso a trilhas de formação, laboratórios práticos e conteúdos atualizados para fortalecer habilidades em nuvem, dados e produtividade digital.</p>
                                         <div className="alert alert-info">
                                             <i className="fas fa-info-circle me-2"></i>
-                                            <strong>Inscrições abertas!</strong> Procure a coordenação do seu curso para mais informações.
+                                            <strong>Inscrições abertas!</strong> Fale com a coordenação do seu curso para participar das próximas turmas.
                                         </div>
                                     </div>
 
                                     <div className="news-item">
                                         <div className="d-flex justify-content-between align-items-start mb-3">
                                             <span className="badge bg-warning">Eventos</span>
-                                            <small className="text-muted">1 de Novembro, 2024</small>
+                                            <small className="text-muted">1 de Julho, 2026</small>
                                         </div>
-                                        <h4>Semana de Tecnologia e Inovação 2024</h4>
-                                        <p>De 25 a 29 de novembro acontece a maior semana acadêmica da Wyden, com palestras, workshops e feira de carreiras. Mais de 50 empresas confirmadas!</p>
+                                        <h4>Semana de Carreiras e Tecnologia 2026</h4>
+                                        <p>Entre 20 e 24 de agosto, a Wyden promove uma semana com palestras, oficinas e feira de oportunidades para aproximar estudantes do mercado de trabalho.</p>
                                         <div className="row">
                                             <div className="col-md-6">
                                                 <h6>Programação:</h6>
                                                 <ul className="list-unstyled">
-                                                    <li><i className="fas fa-calendar me-2"></i>25/11 - Abertura e Keynote</li>
-                                                    <li><i className="fas fa-calendar me-2"></i>26/11 - Workshops técnicos</li>
-                                                    <li><i className="fas fa-calendar me-2"></i>27/11 - Feira de carreiras</li>
-                                                    <li><i className="fas fa-calendar me-2"></i>28/11 - Hackathon interno</li>
-                                                    <li><i className="fas fa-calendar me-2"></i>29/11 - Premiação e encerramento</li>
+                                                    <li><i className="fas fa-calendar me-2"></i>20/08 - Abertura e keynote</li>
+                                                    <li><i className="fas fa-calendar me-2"></i>21/08 - Oficinas técnicas</li>
+                                                    <li><i className="fas fa-calendar me-2"></i>22/08 - Feira de carreiras</li>
+                                                    <li><i className="fas fa-calendar me-2"></i>23/08 - Hackathon interno</li>
+                                                    <li><i className="fas fa-calendar me-2"></i>24/08 - Encerramento e premiação</li>
                                                 </ul>
                                             </div>
                                             <div className="col-md-6">
@@ -981,7 +1001,7 @@ function App() {
                                                     <li><i className="fas fa-building me-2"></i>Microsoft</li>
                                                     <li><i className="fas fa-building me-2"></i>IBM</li>
                                                     <li><i className="fas fa-building me-2"></i>Nubank</li>
-                                                    <li><i className="fas fa-building me-2"></i>+ 46 outras empresas</li>
+                                                    <li><i className="fas fa-building me-2"></i>+ 30 outras empresas</li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -998,21 +1018,21 @@ function App() {
                                                 <i className="fas fa-circle text-primary me-2" style={{fontSize: '8px', marginTop: '8px'}}></i>
                                                 <div>
                                                     <small className="fw-bold">Biblioteca 24h</small><br />
-                                                    <small className="text-muted">Acesso liberado para período de provas</small>
+                                                    <small className="text-muted">Acesso reforçado para período de provas</small>
                                                 </div>
                                             </div>
                                             <div className="d-flex mb-3">
                                                 <i className="fas fa-circle text-success me-2" style={{fontSize: '8px', marginTop: '8px'}}></i>
                                                 <div>
-                                                    <small className="fw-bold">Novo sistema acadêmico</small><br />
-                                                    <small className="text-muted">Portal atualizado com nova interface</small>
+                                                    <small className="fw-bold">Portal acadêmico renovado</small><br />
+                                                    <small className="text-muted">Novos recursos para acompanhamento de disciplinas</small>
                                                 </div>
                                             </div>
                                             <div className="d-flex mb-3">
                                                 <i className="fas fa-circle text-warning me-2" style={{fontSize: '8px', marginTop: '8px'}}></i>
                                                 <div>
                                                     <small className="fw-bold">Estacionamento ampliado</small><br />
-                                                    <small className="text-muted">+200 vagas disponíveis</small>
+                                                    <small className="text-muted">Mais vagas para alunos e docentes</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -1024,18 +1044,18 @@ function App() {
                                         </div>
                                         <div className="card-body">
                                             <div className="mb-3">
-                                                <div className="fw-bold text-primary">18 Nov 2025</div>
-                                                <small>Palestra: "Futuro do Trabalho"</small>
+                                                <div className="fw-bold text-primary">30 Jul 2026</div>
+                                                <small>Palestra: “O futuro do trabalho com IA”</small>
                                                 <br /><small className="text-muted">19h - Auditório Principal</small>
                                             </div>
                                             <div className="mb-3">
-                                                <div className="fw-bold text-primary">22 Nov</div>
-                                                <small>Workshop: React & Node.js</small>
+                                                <div className="fw-bold text-primary">12 Ago</div>
+                                                <small>Workshop: Data Analytics e Power BI</small>
                                                 <br /><small className="text-muted">14h - Lab de Informática</small>
                                             </div>
                                             <div className="mb-3">
-                                                <div className="fw-bold text-primary">25 Nov</div>
-                                                <small>Semana de Tecnologia (início)</small>
+                                                <div className="fw-bold text-primary">20 Ago</div>
+                                                <small>Semana de Carreiras e Tecnologia (início)</small>
                                                 <br /><small className="text-muted">8h - Campus completo</small>
                                             </div>
                                         </div>
@@ -1047,18 +1067,18 @@ function App() {
                                         </div>
                                         <div className="card-body">
                                             <div className="text-center">
-                                                <h3 className="text-success">92%</h3>
+                                                <h3 className="text-success">94%</h3>
                                                 <small>Taxa de empregabilidade</small>
                                             </div>
                                             <hr />
                                             <div className="text-center">
-                                                <h3 className="text-primary">4.8/5</h3>
+                                                <h3 className="text-primary">4.9/5</h3>
                                                 <small>Avaliação dos alunos</small>
                                             </div>
                                             <hr />
                                             <div className="text-center">
-                                                <h3 className="text-warning">15+</h3>
-                                                <small>Prêmios acadêmicos em 2024</small>
+                                                <h3 className="text-warning">20+</h3>
+                                                <small>Prêmios acadêmicos em 2026</small>
                                             </div>
                                         </div>
                                     </div>
@@ -1844,7 +1864,7 @@ function App() {
                         Faculdade Wyden
                     </h5>
                     <p>Faculdade Wyden - Conectando você ao futuro desde 1999.</p>
-                    <p>&copy; 2024 Faculdade Wyden. Todos os direitos reservados.</p>
+                    <p>&copy; 2026 Faculdade Wyden. Todos os direitos reservados.</p>
                 </div>
             </footer>
 
