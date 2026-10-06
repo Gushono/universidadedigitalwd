@@ -42,6 +42,23 @@ function resolveUserType(user) {
     return user?.email?.includes('@aluno.') ? 'student' : 'staff';
 }
 
+// Monta o usuário em três camadas, da menor para a maior prioridade:
+//   padrão (notas/matérias de exemplo) < mock específico < API
+// Assim um aluno que existe só no backend ainda vê disciplinas e dados
+// acadêmicos, em vez de uma tela vazia.
+function buildUserProfile(mockUser, apiUser) {
+    const merged = mergeUserData(mockUser, apiUser);
+    if (!merged) return null;
+
+    // Os dados padrão são acadêmicos: não fazem sentido para professor/admin.
+    if (resolveUserType(merged) !== 'student') return merged;
+
+    const defaults = typeof window !== 'undefined' ? window.DEFAULT_STUDENT_DATA : null;
+    if (!defaults) return merged;
+
+    return mergeUserData(mergeUserData(defaults, mockUser), apiUser);
+}
+
 // Mescla os dados da API por cima do mock local. Campos vazios da API são
 // ignorados para não apagar dados que só existem no mock.
 function mergeUserData(mockUser, apiUser) {
@@ -293,7 +310,7 @@ function App() {
 
     // Usuário exibido: dados da API (cpf, fotoPath, etc.) têm prioridade sobre os mocks
     const displayUser = React.useMemo(
-        () => mergeUserData(currentUser, apiUserData),
+        () => buildUserProfile(currentUser, apiUserData),
         [currentUser, apiUserData]
     );
 
@@ -828,11 +845,11 @@ function App() {
                                             </h5>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>Nome Completo:</strong></div>
-                                                <div className="col-sm-7">{currentUser.name}</div>
+                                                <div className="col-sm-7">{displayUser.name}</div>
                                             </div>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>Data de Nascimento:</strong></div>
-                                                <div className="col-sm-7">{currentUser.dataNascimento}</div>
+                                                <div className="col-sm-7">{displayUser.dataNascimento}</div>
                                             </div>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>CPF:</strong></div>
@@ -844,11 +861,11 @@ function App() {
                                             </div>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>Email Institucional:</strong></div>
-                                                <div className="col-sm-7">{currentUser.email}</div>
+                                                <div className="col-sm-7">{displayUser.email}</div>
                                             </div>
                                             <div className="row">
                                                 <div className="col-sm-5"><strong>Telefone:</strong></div>
-                                                <div className="col-sm-7">{currentUser.telefone}</div>
+                                                <div className="col-sm-7">{displayUser.telefone}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -862,35 +879,35 @@ function App() {
                                             </h5>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>Matrícula:</strong></div>
-                                                <div className="col-sm-7">{currentUser.matricula}</div>
+                                                <div className="col-sm-7">{displayUser.matricula}</div>
                                             </div>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>Curso:</strong></div>
-                                                <div className="col-sm-7">{currentUser.curso}</div>
+                                                <div className="col-sm-7">{displayUser.curso}</div>
                                             </div>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>Período Atual:</strong></div>
-                                                <div className="col-sm-7">{currentUser.periodo}</div>
+                                                <div className="col-sm-7">{displayUser.periodo}</div>
                                             </div>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>Situação:</strong></div>
                                                 <div className="col-sm-7">
-                                                    <span className="badge bg-success">{currentUser.situacao}</span>
+                                                    <span className="badge bg-success">{displayUser.situacao}</span>
                                                 </div>
                                             </div>
                                             <div className="row mb-3">
                                                 <div className="col-sm-5"><strong>CR (Coeficiente):</strong></div>
-                                                <div className="col-sm-7">{currentUser.cr}</div>
+                                                <div className="col-sm-7">{displayUser.cr}</div>
                                             </div>
                                             <div className="row">
                                                 <div className="col-sm-5"><strong>Carga Horária:</strong></div>
-                                                <div className="col-sm-7">{currentUser.cargaHoraria}</div>
+                                                <div className="col-sm-7">{displayUser.cargaHoraria}</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {currentUser.disciplinas && (
+                                {displayUser.disciplinas && (
                                     <div className="col-12 mb-4">
                                         <div className="card">
                                             <div className="card-body">
@@ -909,7 +926,7 @@ function App() {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {currentUser.disciplinas.map((disciplina, index) => (
+                                                            {displayUser.disciplinas.map((disciplina, index) => (
                                                                 <tr key={index}>
                                                                     <td>{disciplina.codigo}</td>
                                                                     <td>{disciplina.nome}</td>

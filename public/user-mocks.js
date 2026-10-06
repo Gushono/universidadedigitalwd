@@ -749,6 +749,59 @@ const USER_MOCKS = {
     }
 };
 
+// Dados acadêmicos padrão para alunos que existem no backend mas ainda não têm
+// mock próprio aqui. Serve só de preenchimento: qualquer campo que a API
+// devolver sobrescreve o valor abaixo.
+const DEFAULT_STUDENT_DATA = {
+    type: 'student',
+    situacao: 'Ativo',
+    cr: '8.0',
+    cargaHoraria: '960 / 3.200 horas',
+    periodo: '1º Semestre',
+    turno: 'Noturno',
+    formaIngresso: 'Vestibular Wyden',
+    tipoSanguineo: '-',
+    dataNascimento: '-',
+    telefone: '-',
+    disciplinas: [
+        {
+            codigo: 'ADM101',
+            nome: 'Introdução à Administração',
+            creditos: 4,
+            nota: 8.5,
+            situacao: 'Aprovado'
+        },
+        {
+            codigo: 'MAT101',
+            nome: 'Matemática Aplicada',
+            creditos: 4,
+            nota: 7.8,
+            situacao: 'Aprovado'
+        },
+        {
+            codigo: 'POR101',
+            nome: 'Comunicação e Expressão',
+            creditos: 4,
+            nota: 9.0,
+            situacao: 'Aprovado'
+        },
+        {
+            codigo: 'SOC101',
+            nome: 'Sociologia Aplicada',
+            creditos: 4,
+            nota: null,
+            situacao: 'Em Andamento'
+        },
+        {
+            codigo: 'INF101',
+            nome: 'Fundamentos de Informática',
+            creditos: 4,
+            nota: null,
+            situacao: 'Em Andamento'
+        }
+    ]
+};
+
 // Função para buscar usuário por email
 function getUserByEmail(email) {
     return USER_MOCKS[email] || null;
@@ -767,6 +820,7 @@ function authenticateUser(email, password) {
 // Exportar para uso global
 if (typeof window !== 'undefined') {
     window.USER_MOCKS = USER_MOCKS;
+    window.DEFAULT_STUDENT_DATA = DEFAULT_STUDENT_DATA;
     window.getUserByEmail = getUserByEmail;
     window.authenticateUser = authenticateUser;
 }
