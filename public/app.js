@@ -1,5 +1,66 @@
 const { useState } = React;
 
+const API_BASE_URL = 'https://railwayuniversity-production.up.railway.app';
+
+// Busca um usuário na API distinguindo os três desfechos possíveis:
+//   found     -> existe no backend
+//   not-found -> backend respondeu que não existe (404)
+//   error     -> API fora do ar / rede caiu (não dá para afirmar nada)
+// O login precisa dessa diferença: "não existe" barra o acesso, "API fora" não.
+async function requestApiUser(email) {
+    if (!email) return { status: 'not-found', user: null };
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/${email}`);
+
+        if (response.status === 404) {
+            return { status: 'not-found', user: null };
+        }
+        if (!response.ok) {
+            console.warn(`API respondeu ${response.status}, usando dados locais`);
+            return { status: 'error', user: null };
+        }
+
+        const data = await response.json();
+        const user = data.user || data;
+        return user ? { status: 'found', user } : { status: 'not-found', user: null };
+    } catch (error) {
+        console.error('Erro ao conectar à API:', error);
+        return { status: 'error', user: null };
+    }
+}
+
+// Atalho para as telas que só querem os dados, sem ligar para o motivo da falha.
+async function fetchApiUser(email) {
+    const { user } = await requestApiUser(email);
+    return user;
+}
+
+// Define para onde mandar o usuário após o login. O backend ainda não devolve
+// 'type', então o domínio do email serve de fallback.
+function resolveUserType(user) {
+    if (user?.type) return user.type;
+    return user?.email?.includes('@aluno.') ? 'student' : 'staff';
+}
+
+// Mescla os dados da API por cima do mock local. Campos vazios da API são
+// ignorados para não apagar dados que só existem no mock.
+function mergeUserData(mockUser, apiUser) {
+    if (!mockUser) return apiUser || null;
+    if (!apiUser) return mockUser;
+
+    const apiFields = Object.entries(apiUser)
+        .filter(([, value]) => value !== null && value !== undefined && value !== '')
+        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+    return { ...mockUser, ...apiFields };
+}
+
+// As imagens vivem no bucket e chegam pela API como URL absoluta (fotoPath).
+// O mock serve de fallback quando a API está fora.
+function getPhotoUrl(user) {
+    return user?.fotoPath || user?.photoPath || null;
+}
+
 // Adicionar paleta de cores moderna
 const COLORS = {
     primary: '#E53E3E',      // Vermelho principal
@@ -224,48 +285,47 @@ function App() {
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [apiUserData, setApiUserData] = useState(null);
     const [userDataLoading, setUserDataLoading] = useState(false);
+    const [publicApiUser, setPublicApiUser] = useState(null);
+    const [publicUserLoading, setPublicUserLoading] = useState(false);
+    const [loginLoading, setLoginLoading] = useState(false);
+    const [loginError, setLoginError] = useState(null);
     const academicEvents = React.useMemo(() => generateUpcomingEvents(), []);
 
-    // Usuário exibido: dados da API (cpf, etc.) têm prioridade sobre os mocks locais
-    const displayUser = React.useMemo(() => {
-        if (!currentUser) return null;
-        if (!apiUserData) return currentUser;
+    // Usuário exibido: dados da API (cpf, fotoPath, etc.) têm prioridade sobre os mocks
+    const displayUser = React.useMemo(
+        () => mergeUserData(currentUser, apiUserData),
+        [currentUser, apiUserData]
+    );
 
-        // Ignora campos vazios da API para não apagar dados que só existem no mock
-        const apiFields = Object.entries(apiUserData)
-            .filter(([, value]) => value !== null && value !== undefined && value !== '')
-            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
-
-        return { ...currentUser, ...apiFields };
-    }, [currentUser, apiUserData]);
-
-    // Carregar dados do usuário da API
-    const fetchUserData = async (email) => {
-        if (!email) return;
-        setUserDataLoading(true);
-        try {
-            const response = await fetch(`https://railwayuniversity-production.up.railway.app/users/${email}`);
-            if (response.ok) {
-                const data = await response.json();
-                setApiUserData(data.user || data);
-            } else {
-                console.warn('Erro ao carregar dados da API, usando dados locais');
-                setApiUserData(null);
-            }
-        } catch (error) {
-            console.error('Erro ao conectar à API:', error);
-            setApiUserData(null);
-        } finally {
-            setUserDataLoading(false);
-        }
-    };
-
-    // Buscar dados quando usuario faz login ou muda de página
+    // Buscar dados do usuário logado quando faz login ou muda de página
     React.useEffect(() => {
-        if (currentUser?.email && (currentPage === 'card' || currentPage === 'profile')) {
-            fetchUserData(currentUser.email);
-        }
+        if (!currentUser?.email || (currentPage !== 'card' && currentPage !== 'profile')) return;
+
+        let cancelled = false;
+        setUserDataLoading(true);
+        fetchApiUser(currentUser.email).then((user) => {
+            if (cancelled) return;
+            setApiUserData(user);
+            setUserDataLoading(false);
+        });
+
+        return () => { cancelled = true; };
     }, [currentUser?.email, currentPage]);
+
+    // Buscar dados da página pública acessada via QR code (usuário não logado)
+    React.useEffect(() => {
+        if (currentPage !== 'user-page' || !userPageEmail) return;
+
+        let cancelled = false;
+        setPublicUserLoading(true);
+        fetchApiUser(userPageEmail).then((user) => {
+            if (cancelled) return;
+            setPublicApiUser(user);
+            setPublicUserLoading(false);
+        });
+
+        return () => { cancelled = true; };
+    }, [currentPage, userPageEmail]);
 
     // Detectar se é uma página de usuário pela URL
     React.useEffect(() => {
@@ -286,6 +346,7 @@ function App() {
         }
         setCurrentPage(page);
         setShowUserDropdown(false); // Fechar dropdown ao navegar
+        setLoginError(null);
 
         if (page === 'calendar') {
             setCurrentMonth(new Date());
@@ -293,28 +354,36 @@ function App() {
         }
     };
 
-    const handleLogin = (email, password) => {
-        // Usar os mocks reais de usuários
-        const user = window.authenticateUser ? window.authenticateUser(email, password) : null;
-        
-        if (user) {
+    // A API é a fonte de verdade sobre quem pode entrar: basta o usuário existir
+    // no backend (a senha não é validada). Assim dá para liberar acesso cadastrando
+    // no backend, sem precisar mexer no front.
+    const handleLogin = async (email) => {
+        setLoginLoading(true);
+        try {
+            const { status, user: apiUser } = await requestApiUser(email);
+            const mockUser = window.getUserByEmail ? window.getUserByEmail(email) : null;
+
+            // Backend afirmou que não existe: barra, mesmo que esteja no mock.
+            if (status === 'not-found') return false;
+            // API fora do ar: só o mock evita travar o acesso de quem já era conhecido.
+            if (status === 'error' && !mockUser) return false;
+
+            const user = mergeUserData(mockUser, apiUser);
             setCurrentUser(user);
+            setApiUserData(apiUser);
             setIsLoggedIn(true);
-            
-            if (user.type === 'student') {
-                setCurrentPage('card');
-            } else {
-                setCurrentPage('profile');
-            }
+            setCurrentPage(resolveUserType(user) === 'student' ? 'card' : 'profile');
             return true;
+        } finally {
+            setLoginLoading(false);
         }
-        return false;
     };
 
     const logout = () => {
         setIsLoggedIn(false);
         setCurrentUser(null);
         setApiUserData(null);
+        setLoginError(null);
         setCurrentPage('home');
         setShowUserDropdown(false);
     };
@@ -668,14 +737,13 @@ function App() {
                                         <h3 className="text-center mb-4">
                                             <i className="fas fa-user-circle"></i> Portal de Acesso
                                         </h3>
-                                        <form onSubmit={(e) => {
+                                        <form onSubmit={async (e) => {
                                             e.preventDefault();
-                                            const email = e.target.email.value;
-                                            const password = e.target.password.value;
-                                            const success = handleLogin(email, password);
-                                            
+                                            setLoginError(null);
+                                            const success = await handleLogin(e.target.email.value);
+
                                             if (!success) {
-                                                alert('Usuário não encontrado!');
+                                                setLoginError('Usuário não encontrado. Verifique o email ou tente novamente em instantes.');
                                             }
                                         }}>
                                             <div className="mb-3">
@@ -701,8 +769,17 @@ function App() {
                                                     required 
                                                 />
                                             </div>
-                                            <button type="submit" className="btn btn-primary w-100">
-                                                <i className="fas fa-unlock"></i> Entrar
+                                            {loginError && (
+                                                <div className="alert alert-danger py-2" role="alert">
+                                                    {loginError}
+                                                </div>
+                                            )}
+                                            <button type="submit" className="btn btn-primary w-100" disabled={loginLoading}>
+                                                {loginLoading ? (
+                                                    <><span className="spinner-border spinner-border-sm me-2" role="status"></span> Entrando...</>
+                                                ) : (
+                                                    <><i className="fas fa-unlock"></i> Entrar</>
+                                                )}
                                             </button>
                                         </form>
                                     </div>
@@ -720,20 +797,20 @@ function App() {
                         <div className="container">
                             <div className="text-center">
                                 <div className="profile-photo mb-4">
-                                    {currentUser?.hasPhoto && currentUser?.photoPath ? (
-                                        <img src={currentUser.photoPath} alt={currentUser.name} 
+                                    {getPhotoUrl(displayUser) ? (
+                                        <img src={getPhotoUrl(displayUser)} alt={displayUser.name}
                                              onError={(e) => {
                                                  e.target.style.display = 'none';
                                                  e.target.nextSibling.style.display = 'flex';
                                              }} />
                                     ) : null}
-                                    <i className={`fas fa-user-circle ${currentUser?.hasPhoto && currentUser?.photoPath ? 'd-none' : ''}`}></i>
+                                    <i className={`fas fa-user-circle ${getPhotoUrl(displayUser) ? 'd-none' : ''}`}></i>
                                 </div>
                                 <div style={{marginTop: '1rem'}}>
-                                    <h1 className="mb-3">{currentUser.name}</h1>
-                                    <p className="lead mb-2">{currentUser.curso}</p>
+                                    <h1 className="mb-3">{displayUser.name}</h1>
+                                    <p className="lead mb-2">{displayUser.curso}</p>
                                     <p className="mb-0" style={{fontSize: '0.9rem', opacity: '0.8'}}>
-                                        Matrícula: {currentUser.matricula} | {currentUser.periodo}
+                                        Matrícula: {displayUser.matricula} | {displayUser.periodo}
                                     </p>
                                 </div>
                             </div>
@@ -892,14 +969,14 @@ function App() {
                                                 
                                                 <div className="card-body">
                                                     <div className="student-photo">
-                                                        {displayUser?.fotoPath ? (
-                                                            <img src={displayUser.fotoPath} alt={displayUser.name} 
+                                                        {getPhotoUrl(displayUser) ? (
+                                                            <img src={getPhotoUrl(displayUser)} alt={displayUser.name}
                                                                  onError={(e) => {
                                                                      e.target.style.display = 'none';
                                                                      e.target.nextSibling.style.display = 'flex';
                                                                  }} />
                                                         ) : null}
-                                                        <i className={`fas fa-user ${displayUser?.fotoPath ? 'd-none' : ''}`}></i>
+                                                        <i className={`fas fa-user ${getPhotoUrl(displayUser) ? 'd-none' : ''}`}></i>
                                                     </div>
                                                     <div className="student-info">
                                                         <h6>{displayUser.name}</h6>
@@ -1333,9 +1410,22 @@ function App() {
             {currentPage === 'user-page' && userPageEmail && (
                 <div>
                     {(() => {
-                        // Buscar usuário pelo email na URL
-                        const user = window.getUserByEmail ? window.getUserByEmail(userPageEmail) : null;
-                        
+                        // Buscar usuário pelo email na URL: API primeiro, mock como fallback
+                        const mockUser = window.getUserByEmail ? window.getUserByEmail(userPageEmail) : null;
+                        const user = mergeUserData(mockUser, publicApiUser);
+
+                        if (publicUserLoading && !user) {
+                            return (
+                                <section className="py-5">
+                                    <div className="container text-center">
+                                        <div className="spinner-border" role="status">
+                                            <span className="visually-hidden">Carregando...</span>
+                                        </div>
+                                    </div>
+                                </section>
+                            );
+                        }
+
                         if (!user) {
                             return (
                                 <section className="py-5">
@@ -1361,14 +1451,14 @@ function App() {
                                     <div className="container">
                                         <div className="text-center">
                                             <div className="profile-photo mb-4">
-                                                {user?.hasPhoto && user?.photoPath ? (
-                                                    <img src={user.photoPath} alt={user.name} 
+                                                {getPhotoUrl(user) ? (
+                                                    <img src={getPhotoUrl(user)} alt={user.name}
                                                          onError={(e) => {
                                                              e.target.style.display = 'none';
                                                              e.target.nextSibling.style.display = 'flex';
                                                          }} />
                                                 ) : null}
-                                                <i className={`fas fa-user-circle ${user?.hasPhoto && user?.photoPath ? 'd-none' : ''}`}></i>
+                                                <i className={`fas fa-user-circle ${getPhotoUrl(user) ? 'd-none' : ''}`}></i>
                                             </div>
                                             <div style={{marginTop: '1rem'}}>
                                                 <h1 className="mb-3">{user.name}</h1>

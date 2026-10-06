@@ -1,4 +1,11 @@
 // Mocks de usuários específicos para o sistema
+
+// As imagens ficam no bucket (Tigris/Railway). Em produção o valor real vem da
+// API em fotoPath; estes caminhos só servem de fallback quando a API está fora.
+// Atenção: o Tigris só serve leitura pública no formato virtual-host (bucket
+// como subdomínio) — trocar para <endpoint>/<bucket>/... devolve 403.
+const PHOTOS_BASE_URL = 'https://modular-tray-5jjezrrdkymw.t3.storageapi.dev/photos';
+
 const USER_MOCKS = {
     // Usuário padrão João Silva
     'joao.silva@aluno.wyden.edu.br': {
@@ -21,7 +28,7 @@ const USER_MOCKS = {
         turno: 'Noturno',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/joao-silva.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/joao-silva.jpg`,
         disciplinas: [
             {
                 codigo: 'SI301',
@@ -82,7 +89,7 @@ const USER_MOCKS = {
         turno: 'Noturno',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/hugo-bersi.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/hugo-bersi.jpg`,
         disciplinas: [
             {
                 codigo: 'SI301',
@@ -157,7 +164,7 @@ const USER_MOCKS = {
         turno: 'Noturno',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/gustavo-honorato.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/gustavo-honorato.jpg`,
         disciplinas: [
             {
                 codigo: 'SI301',
@@ -232,7 +239,7 @@ const USER_MOCKS = {
         turno: 'Noturno',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/mauricio-pires.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/mauricio-pires.jpg`,
         disciplinas: [
             {
                 codigo: 'SI301',
@@ -307,7 +314,7 @@ const USER_MOCKS = {
         turno: 'Matutino',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/guilherme-batista.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/guilherme-batista.jpg`,
         disciplinas: [
             {
                 codigo: 'ADM201',
@@ -368,7 +375,7 @@ const USER_MOCKS = {
         turno: 'Noturno',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/daniel-bersi.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/daniel-bersi.jpg`,
         disciplinas: [
             {
                 codigo: 'MKT401',
@@ -429,7 +436,7 @@ const USER_MOCKS = {
         turno: 'Matutino',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/eduardo-henrique.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/eduardo-henrique.jpg`,
         disciplinas: [
             {
                 codigo: 'DIR501',
@@ -490,7 +497,7 @@ const USER_MOCKS = {
         turno: 'Vespertino',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/fabio-henrique.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/fabio-henrique.jpg`,
         disciplinas: [
             {
                 codigo: 'PSI601',
@@ -553,7 +560,7 @@ const USER_MOCKS = {
         turno: 'Noturno',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/leticia-souza.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/leticia-souza.jpg`,
         disciplinas: [
             {
                 codigo: 'ADM401',
@@ -614,7 +621,7 @@ const USER_MOCKS = {
         turno: 'Noturno',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/tauane.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/tauane.jpg`,
         disciplinas: [
             {
                 codigo: 'ADM401',
@@ -675,7 +682,7 @@ const USER_MOCKS = {
         turno: 'Noturno',
         type: 'student',
         hasPhoto: true,
-        photoPath: 'photos/alessandra-souza.jpg',
+        photoPath: `${PHOTOS_BASE_URL}/alessandra-souza.jpg`,
         disciplinas: [
             {
                 codigo: 'ADM401',
@@ -727,7 +734,7 @@ const USER_MOCKS = {
         telefone: '(11) 3333-4444',
         type: 'teacher',
         hasPhoto: true,
-        photoPath: 'photos/maria-santos.jpg'
+        photoPath: `${PHOTOS_BASE_URL}/maria-santos.jpg`
     },
 
     // Administrador exemplo
